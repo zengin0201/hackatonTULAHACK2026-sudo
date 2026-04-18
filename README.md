@@ -7,6 +7,7 @@
 npm install
 npm install motion
 npm install react react-dom
+npm install lucide-react
 
 ```
 ```
