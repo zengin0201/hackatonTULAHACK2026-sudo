@@ -17,7 +17,6 @@ export default function Login() {
   
   const navigate = useNavigate();
 
-  
   if (!isLoading && user) {
     return <Navigate to="/" replace />;
   }
@@ -43,33 +42,34 @@ export default function Login() {
           email,
           password,
           options: {
-            data: { role, name }
+            data: { 
+              role, 
+              name: name || email.split('@')[0] 
+            }
           }
         });
         if (signUpError) throw signUpError;
         
         if (data.user) {
-          
           const { error: insertError } = await supabase.from('profiles').upsert([{
-             id: data.user.id,
-             email,
-             role,
-             onboarding_answers: {}
+            id: data.user.id,
+            email,
+            name: name || email.split('@')[0],
+            role,
+            onboarding_answers: {}
           }]);
           
           if (insertError) {
-             throw new Error(`Ошибка записи профиля в таблицу profiles (проверьте RLS или триггеры): ${insertError.message}`);
+            throw new Error(`Ошибка записи профиля в таблицу profiles: ${insertError.message}`);
           }
           
           await refreshProfile();
-          
-          
           setTimeout(() => navigate('/'), 100);
         }
       }
     } catch (err: any) {
       if (err.message && err.message.includes("rate limit")) {
-        setError("Supabase: Превышен лимит регистраций с одного IP (Email rate limit exceeded). Зайдите в Supabase -> Authentication -> Rate Limits -> отключите ограничения или увеличьте лимит, чтобы тестировать неограниченно.");
+        setError("Превышен лимит регистраций. Попробуйте позже.");
       } else {
         setError(err.message || 'Произошла ошибка при авторизации');
       }
