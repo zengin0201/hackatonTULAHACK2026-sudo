@@ -63,13 +63,13 @@ const SponsorshipModal = ({ pet, onClose, onSuccess }: { pet: Pet, onClose: () =
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 z-[70] bg-app-bg/80 backdrop-blur-sm flex items-center justify-center p-6"
+      className="absolute inset-0 z-[70] bg-app-bg/80 backdrop-blur-sm flex items-center justify-center p-6 "
     >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-[340px] bg-app-card rounded-[32px] border border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.8)] overflow-hidden"
+        className="w-full max-w-[340px] bg-app-card rounded-[32px] border border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.8)] overflow-hidden "
       >
         <div className="relative p-6 flex flex-col items-center">
           <button 
@@ -516,7 +516,7 @@ export default function Feed() {
         </AnimatePresence>
       </div>
 
-      <div className="flex gap-4 md:gap-5 flex-wrap justify-center items-center z-10 w-full max-w-[420px] px-4 pb-17">
+      <div className="flex gap-4 md:gap-5 flex-wrap justify-center items-center z-10 w-full max-w-[420px] px-4 mb-24">
         <button 
           onClick={() => forceSwipe('left')}
           disabled={pets.length === 0 || !!detailedPet}
