@@ -2,7 +2,7 @@
 
 **Prerequisites:**  Node.js
 
-# Запуск
+# Запуск:
 ```
 npm install
 npm install motion
