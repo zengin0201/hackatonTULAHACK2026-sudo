@@ -75,7 +75,7 @@ export default function Profile() {
   return (
     <div className="w-full h-full max-w-2xl mx-auto flex flex-col gap-6 overflow-y-auto pb-10 px-4 bg-[#0F172A] text-white">
       
-      {/* Карточка профиля */}
+     
       <motion.div 
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -154,7 +154,7 @@ export default function Profile() {
           </div>
           
           <div className="p-6 md:p-8 flex flex-col gap-6">
-            {/* Поля формы аналогичны твоему коду, они уже используют formData */}
+            
             <div className="flex flex-col gap-2">
               <label className="text-xs uppercase tracking-widest text-slate-400 font-bold">Где вы живете?</label>
               {isEditing ? (
@@ -226,7 +226,7 @@ export default function Profile() {
         </motion.div>
       )}
 
-      {/* Инфо для приютов */}
+     
       {effectiveRole === 'SHELTER' && (
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
