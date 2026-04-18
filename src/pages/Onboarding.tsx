@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { supabase } from '../utils/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import { PawPrint, Loader2, ArrowRight } from 'lucide-react';
 
 export default function Onboarding() {
-  const { user, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
 
   const [step, setStep] = useState(1);
@@ -16,6 +16,18 @@ export default function Onboarding() {
     other_pets: ''
   });
 
+  // 1. Сначала проверяем наличие пользователя
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // 2. Проверяем, нужен ли онбординг
+  const needsOnboarding = profile?.role === 'ADOPTER' && !profile?.onboarding_completed;
+  
+  if (!needsOnboarding) {
+    return <Navigate to="/" replace />;
+  }
+
   const handleNext = () => setStep(s => s + 1);
 
   const handleFinish = async () => {
@@ -25,17 +37,22 @@ export default function Onboarding() {
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({ onboarding_answers: answers })
+        .update({ 
+          onboarding_answers: answers,
+          onboarding_completed: true
+        })
         .eq('id', user.id);
         
       if (error) throw error;
       
       await refreshProfile();
-      navigate('/');
+      
+      // Перенаправляем сразу
+      navigate('/', { replace: true });
+      
     } catch (e) {
       console.error('Onboarding save error:', e);
       alert('Произошла ошибка при сохранении данных.');
-    } finally {
       setLoading(false);
     }
   };
@@ -65,7 +82,7 @@ export default function Onboarding() {
       desc: 'Важно для определения зооагрессии',
       options: [
         { value: 'yes', label: 'Да, у меня уже есть питомец' },
-        { value: 'no', label: 'Нет, это будет мой первый ' }
+        { value: 'no', label: 'Нет, это будет мой первый' }
       ]
     }
   ];
@@ -119,11 +136,19 @@ export default function Onboarding() {
             disabled={!(answers as any)[currentStep.id] || loading}
             className="w-full h-14 bg-app-accent text-app-bg font-bold rounded-2xl flex items-center justify-center gap-2 hover:bg-sky-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (step === steps.length ? 'Завершить' : 'Далее')}
-            {!loading && <ArrowRight className="w-5 h-5" />}
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Сохранение...
+              </>
+            ) : (
+              <>
+                {step === steps.length ? 'Завершить' : 'Далее'}
+                {!loading && <ArrowRight className="w-5 h-5" />}
+              </>
+            )}
           </button>
         </div>
-
       </div>
     </div>
   );

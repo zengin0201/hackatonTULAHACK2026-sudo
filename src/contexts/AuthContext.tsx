@@ -51,7 +51,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
            email: activeUser.email,
            role: activeUser.user_metadata?.role || 'ADOPTER',
            name: activeUser.user_metadata?.name || '',
-           onboarding_answers: {}
+           onboarding_answers: activeUser.user_metadata?.onboarding_answers || {},
+           onboarding_completed: activeUser.user_metadata?.onboarding_completed || false 
         };
         console.log("Generating synthetic profile from auth metadata:", syntheticProfile);
         setProfile(syntheticProfile);
