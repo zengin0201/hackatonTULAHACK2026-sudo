@@ -17,6 +17,7 @@ export default function Dashboard() {
     requiresSpace: false,
     catFriendly: true,
     donationGoal: "",
+    type: "dog",
   });
 
   const effectiveRole = profile?.role || user?.user_metadata?.role;
@@ -91,6 +92,7 @@ export default function Dashboard() {
         age: parseInt(formData.age),
         description: formData.description,
         image_urls: imageUrls.filter((url) => url.trim() !== ""),
+        type: formData.type,
         attributes: {
           requires_space: formData.requiresSpace,
           cat_friendly: formData.catFriendly,
@@ -107,6 +109,7 @@ export default function Dashboard() {
         requiresSpace: false,
         catFriendly: true,
         donationGoal: "",
+        type: "dog",
       });
 
       await fetchPets();
@@ -145,6 +148,39 @@ export default function Dashboard() {
         </div>
         <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div>
+              <label className="text-xs uppercase tracking-widest text-slate-500 mb-2 block">
+                Кто это?
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {[
+                  { id: "dog", label: "Собака", icon: "🐶" },
+                  { id: "cat", label: "Кот", icon: "🐱" },
+                  { id: "parrot", label: "Попугай", icon: "🦜" },
+                  { id: "rodent", label: "Грызун", icon: "🐁" },
+                  { id: "turtle", label: "Рептилия", icon: "🐢" },
+                  { id: "other", label: "Другое", icon: "🐹" },
+                ].map((typeObj) => (
+                  <button
+                    key={typeObj.id}
+                    type="button"
+                    onClick={() =>
+                      setFormData({ ...formData, type: typeObj.id })
+                    }
+                    className={`flex flex-col items-center gap-1 py-3 rounded-xl border text-sm transition-all ${
+                      formData.type === typeObj.id
+                        ? "bg-app-accent/20 border-app-accent text-white shadow-lg shadow-app-accent/10"
+                        : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10"
+                    }`}
+                  >
+                    <span className="text-xl">{typeObj.icon}</span>
+                    <span className="text-[10px] uppercase font-bold tracking-tighter">
+                      {typeObj.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
             <div>
               <label className="text-xs uppercase tracking-widest text-app-dim mb-1 block">
                 Имя
