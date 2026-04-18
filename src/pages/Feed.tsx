@@ -41,6 +41,15 @@ interface Pet {
   shelterName?: string;
 }
 
+const CATEGORIES = [
+  { id: 'all', label: 'Все лапки', icon: '🐾' },
+  { id: 'dog', label: 'Собаки', icon: '🐶' },
+  { id: 'cat', label: 'Кошки', icon: '🐱' },
+  { id: 'parrot', label: 'Попугаи', icon: '🦜' },
+  { id: 'rodent', label: 'Грызуны', icon: '🐁' },
+  { id: 'turtle', label: 'Рептилии', icon: '🐢' },
+  { id: 'other', label: 'Другие', icon: '🐹' }
+];
 const ImageCarousel = ({
   imageUrls,
   petName,
@@ -507,6 +516,8 @@ export default function Feed() {
   const [detailedPet, setDetailedPet] = useState<Pet | null>(null);
   const [sponsoringPet, setSponsoringPet] = useState<Pet | null>(null);
   const [filter, setFilter] = useState<string>("all");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+const activeCategory = CATEGORIES.find(c => c.id === filter) || CATEGORIES[0];
 
   useEffect(() => {
     if (user && profile?.role !== "SHELTER") {
@@ -702,42 +713,74 @@ export default function Feed() {
   return (
     <div className="flex flex-col items-center w-full h-full justify-center relative">
       {/* Контейнер фильтров */}
-      <div className="sticky top-0 z-30 bg-app-bg/95 backdrop-blur-sm border-b border-white/5 mb-4">
-        <div className="flex gap-2 px-4 py-4 overflow-x-auto no-scrollbar">
-          {[
-            { id: 'all', label: 'Все лапки', icon: '🐾' },
-            { id: 'dog', label: 'Собаки', icon: '🐶' },
-            { id: 'cat', label: 'Кошки', icon: '🐱' },
-            {id:"parrot",label:"Попугаи",icon : "🦜"},
-            {id:"rodent",label:"Грызуны",icon : "🐁"},
-            {id:"turtle",label:"Рептилии",icon : "🐢"},
-            { id: 'other', label: 'Другие', icon: '🐹' }
-          ].map((cat) => {
-            const isActive = filter === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setFilter(cat.id)}
-                className={`
-            flex items-center gap-2 px-5 py-2.5 rounded-2xl whitespace-nowrap 
-            transition-all duration-300 border
-            ${isActive
-                    ? 'bg-app-accent border-app-accent text-app-bg font-bold shadow-[0_0_20px_rgba(125,211,252,0.3)] scale-105'
-                    : 'bg-white/5 border-white/10 text-app-dim hover:bg-white/10 hover:border-white/20'
-                  }
-          `}
-              >
-                <span className={`text-lg ${isActive ? 'scale-110' : 'opacity-70'}`}>
-                  {cat.icon}
-                </span>
-                <span className="text-sm tracking-wide">
-                  {cat.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+      <div className="sticky top-0 z-30 bg-app-bg/95 backdrop-blur-sm border-b border-white/5 mb-4 px-4 py-3">
+  
+  {/* МОБИЛЬНЫЙ ВИД: Выпадающий список (показывается только на маленьких экранах) */}
+  <div className="sm:hidden relative">
+    <button
+      onClick={() => setIsMenuOpen(!isMenuOpen)}
+      className="w-full flex items-center justify-between bg-white/5 border border-white/10 px-4 py-3 rounded-2xl text-white active:scale-95 transition-all"
+    >
+      <div className="flex items-center gap-3">
+        <span className="text-xl">{activeCategory.icon}</span>
+        <span className="font-bold tracking-wide">{activeCategory.label}</span>
       </div>
+      <ChevronDown className={`w-5 h-5 text-app-dim transition-transform duration-300 ${isMenuOpen ? 'rotate-180' : ''}`} />
+    </button>
+
+    <AnimatePresence>
+      {isMenuOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className="absolute top-full left-0 right-0 mt-2 bg-[#1E293B] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50"
+        >
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => {
+                setFilter(cat.id);
+                setIsMenuOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-4 hover:bg-white/5 transition-colors border-b border-white/5 last:border-none ${
+                filter === cat.id ? 'bg-app-accent/10 text-app-accent' : 'text-app-dim'
+              }`}
+            >
+              <span className="text-xl">{cat.icon}</span>
+              <span className="font-medium">{cat.label}</span>
+              {filter === cat.id && (
+                <div className="ml-auto w-2 h-2 rounded-full bg-app-accent shadow-[0_0_8px_#7dd3fc]" />
+              )}
+            </button>
+          ))}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </div>
+
+  {/* ДЕСКТОПНЫЙ ВИД: Горизонтальные кнопки (показывается от sm и выше) */}
+  {/* ДЕСКТОПНЫЙ ВИД: Горизонтальные кнопки */}
+<div className="hidden sm:flex gap-2 overflow-x-auto overflow-y-hidden no-scrollbar py-4 px-4 items-center justify-center">
+  {CATEGORIES.map((cat) => (
+    <button
+      key={cat.id}
+      onClick={() => setFilter(cat.id)}
+      className={`
+        flex items-center gap-2 px-5 py-2.5 rounded-2xl whitespace-nowrap 
+        transition-all duration-300 border
+        ${filter === cat.id 
+          ? 'bg-app-accent border-app-accent text-app-bg font-bold shadow-lg scale-105' 
+          : 'bg-white/5 border-white/10 text-app-dim hover:bg-white/10 hover:border-white/20'
+        }
+      `}
+    >
+      <span>{cat.icon}</span>
+      <span className="text-sm">{cat.label}</span>
+    </button>
+  ))}
+</div>
+</div>
       <div className="relative w-full max-w-[420px] flex-1 md:h-[580px] md:flex-none mb-4 md:mb-8">
         {loading ? (
           <div className="absolute inset-0 h-full bg-app-card rounded-[32px] border border-white/10 flex items-center justify-center shadow-2xl z-10">
@@ -878,7 +921,7 @@ export default function Feed() {
                       petName={matchPet.name}
                     />
                   </div>
-                  <span className="text-xs font-medium text-app-text">
+                  <span className="text-xs font-medium text-app-text truncate w-full text-center px-2">
                     {matchPet.name}
                   </span>
                 </div>
