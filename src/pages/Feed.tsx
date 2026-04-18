@@ -516,7 +516,7 @@ export default function Feed() {
         </AnimatePresence>
       </div>
 
-      <div className="flex gap-4 md:gap-5 flex-wrap justify-center items-center z-10 w-full max-w-[420px] px-4">
+      <div className="flex gap-4 md:gap-5 flex-wrap justify-center items-center z-10 w-full max-w-[420px] px-4 pb-17">
         <button 
           onClick={() => forceSwipe('left')}
           disabled={pets.length === 0 || !!detailedPet}
