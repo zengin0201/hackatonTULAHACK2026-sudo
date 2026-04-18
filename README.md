@@ -5,6 +5,7 @@
 # Запуск
 ```
 npm install
+npm install motion
 npm install react react-dom
 
 ```
