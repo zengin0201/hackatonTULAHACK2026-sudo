@@ -377,7 +377,7 @@ export default function Dashboard() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-bold truncate">
+                  <h3 className="font-bold text-app-text truncate">
                     {pet.name}, {pet.age} лет
                   </h3>
                   <p className="text-xs text-app-dim truncate">
