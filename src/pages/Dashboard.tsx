@@ -13,7 +13,7 @@ export default function Dashboard() {
     name: '',
     age: '',
     description: '',
-    imageUrl: '',
+    imageUrls: '',
     requiresSpace: false,
     catFriendly: true,
     donationGoal: ''
@@ -58,7 +58,11 @@ export default function Dashboard() {
       }
     }
   };
-
+const urlsArray = formData.imageUrls
+  .split(',') 
+  .map(url => url.trim()) 
+  .filter(url => url !== '');
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -68,7 +72,7 @@ export default function Dashboard() {
         name: formData.name,
         age: parseInt(formData.age),
         description: formData.description,
-        image_urls: [formData.imageUrl],
+        image_urls: urlsArray,
         attributes: {
           requires_space: formData.requiresSpace,
           cat_friendly: formData.catFriendly
@@ -79,7 +83,7 @@ export default function Dashboard() {
       if (error) throw error;
       
       setFormData({
-        name: '', age: '', description: '', imageUrl: '',
+        name: '', age: '', description: '', imageUrls: '',
         requiresSpace: false, catFriendly: true, donationGoal: ''
       });
       
@@ -132,7 +136,7 @@ export default function Dashboard() {
 
             <div>
               <label className="text-xs uppercase tracking-widest text-app-dim mb-1 block">URL фотографии</label>
-              <input type="url" required value={formData.imageUrl} onChange={e => setFormData({...formData, imageUrl: e.target.value})} className="w-full bg-app-glass border border-white/10 rounded-xl px-4 py-3 text-app-text focus:outline-none focus:border-app-accent transition-all" placeholder="https://..." />
+              <input type="url" required value={formData.imageUrls} onChange={(e) => setFormData({...formData, imageUrls: e.target.value})} className="w-full bg-app-glass border border-white/10 rounded-xl px-4 py-3 text-app-text focus:outline-none focus:border-app-accent transition-all" placeholder="Ссылки https://img1.com, https://img2.com"/>
             </div>
 
             <div>
