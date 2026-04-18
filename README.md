@@ -21,3 +21,8 @@ VITE_SUPABASE_ANON_KEY = КЛЮЧ ПРОЕКТА SUPABASE
 ```
 npm run dev
 ```
+
+# МОБИЛЬНОЕ ПРИЛОЖЕНИЕ
+```
+https://github.com/timati565/PawMatch
+```
