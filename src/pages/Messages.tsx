@@ -4,7 +4,6 @@ import { supabase } from '../utils/supabaseClient';
 import { Loader2, Send, MessageCircle, ArrowLeft, Star, X, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-
 interface Pet {
   id: string;
   name: string;
@@ -41,7 +40,6 @@ export default function Messages() {
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
 
   const fetchMatches = async () => {
     if (!user?.id) return;
@@ -116,35 +114,35 @@ export default function Messages() {
   };
 
   const submitRating = async () => {
-  if (rating === 0 || !activeMatch) return;
-  
-  try {
-    const { error } = await supabase
-      .from('matches')
-      .update({ shelter_rating: rating })
-      .eq('id', activeMatch.id);
+    if (rating === 0 || !activeMatch) return;
+    
+    try {
+      const { error } = await supabase
+        .from('matches')
+        .update({ shelter_rating: rating })
+        .eq('id', activeMatch.id);
+        
+      if (error) throw error;
       
-    if (error) throw error;
-    
-    const updatedMatch = { ...activeMatch, shelter_rating: rating };
-    setActiveMatch(updatedMatch);
-    
-    setMatches(prev => prev.map(m => 
-      m.id === activeMatch.id ? updatedMatch : m
-    ));
-    
-    setRatingSubmitted(true);
-    
-    setTimeout(() => {
-      setShowRating(false);
-      setRatingSubmitted(false);
-    }, 2000);
-    
-  } catch (e) {
-    console.error('Rating error:', e);
-    alert('Не удалось сохранить оценку');
-  }
-};
+      const updatedMatch = { ...activeMatch, shelter_rating: rating };
+      setActiveMatch(updatedMatch);
+      
+      setMatches(prev => prev.map(m => 
+        m.id === activeMatch.id ? updatedMatch : m
+      ));
+      
+      setRatingSubmitted(true);
+      
+      setTimeout(() => {
+        setShowRating(false);
+        setRatingSubmitted(false);
+      }, 2000);
+      
+    } catch (e) {
+      console.error('Rating error:', e);
+      alert('Не удалось сохранить оценку');
+    }
+  };
 
   const deleteRating = async () => {
     if (!activeMatch) return;
@@ -161,6 +159,7 @@ export default function Messages() {
       setShowRating(false);
     } catch (e) {
       console.error('Delete rating error:', e);
+      alert('Произошла ошибка при удалении');
     }
   };
 
@@ -288,128 +287,101 @@ export default function Messages() {
         )}
       </div>
 
-      {/* Rating Modal */}
       {/* Modal Rating */}
-<AnimatePresence>
-  {showRating && (
-    <motion.div 
-      initial={{ opacity: 0 }} 
-      animate={{ opacity: 1 }} 
-      exit={{ opacity: 0 }} 
-      className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
-      onClick={() => {
-        setShowRating(false);
-        setRatingSubmitted(false);
-        setRating(activeMatch?.shelter_rating || 0); // Сбрасываем рейтинг к сохраненному значению
-      }}
-    >
-      <motion.div 
-        initial={{ scale: 0.9, y: 20 }} 
-        animate={{ scale: 1, y: 0 }} 
-        className="w-full max-w-[340px] bg-[#1a1a1a] rounded-[32px] border border-white/10 p-8 text-center shadow-2xl relative"
-        onClick={(e) => e.stopPropagation()} // Предотвращаем закрытие при клике внутри
-      >
-        {/* Кнопка закрытия модалки (Крестик) */}
-        <button 
-          onClick={() => {
-            setShowRating(false);
-            setRatingSubmitted(false);
-            setRating(activeMatch?.shelter_rating || 0); // Сбрасываем рейтинг
-          }} 
-          className="absolute top-4 right-4 p-2 hover:bg-white/5 rounded-full opacity-50 hover:opacity-100 transition-all"
-        >
-          <X size={20} />
-        </button>
-
-        <h3 className="text-xl font-bold mb-6">Оценка приюта</h3>
-
-        {ratingSubmitted ? (
+      <AnimatePresence>
+        {showRating && (
           <motion.div 
-            initial={{ scale: 0 }} 
-            animate={{ scale: 1 }} 
-            className="py-4"
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
+            onClick={() => {
+              setShowRating(false);
+              setRatingSubmitted(false);
+              setRating(activeMatch?.shelter_rating || 0);
+            }}
           >
-            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <p className="text-green-500 font-bold mb-4">Оценка сохранена!</p>
-            <button 
-              onClick={() => {
-                setShowRating(false);
-                setRatingSubmitted(false);
-              }}
-              className="px-6 py-2 bg-white/5 rounded-xl text-sm font-medium hover:bg-white/10 transition-colors"
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }} 
+              animate={{ scale: 1, y: 0 }} 
+              className="w-full max-w-[340px] bg-[#1a1a1a] rounded-[32px] border border-white/10 p-8 text-center shadow-2xl relative"
+              onClick={(e) => e.stopPropagation()}
             >
-              Закрыть
-            </button>
-          </motion.div>
-        ) : (
-          <>
-            <div className="flex justify-center gap-2 mb-8">
-              {[1, 2, 3, 4, 5].map(s => (
-                <button 
-                  key={s} 
-                  onClick={() => setRating(s)} 
-                  className="transition-transform hover:scale-110 active:scale-95"
-                  type="button"
-                >
-                  <Star 
-                    size={32} 
-                    className={rating >= s ? "fill-yellow-400 text-yellow-400" : "text-white/20 hover:text-white/40"} 
-                  />
-                </button>
-              ))}
-            </div>
-
-            <div className="flex flex-col gap-2">
               <button 
-                onClick={submitRating} 
-                disabled={rating === 0} 
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-2xl font-bold text-sm disabled:opacity-30 disabled:hover:bg-blue-600 transition-all"
+                onClick={() => {
+                  setShowRating(false);
+                  setRatingSubmitted(false);
+                  setRating(activeMatch?.shelter_rating || 0);
+                }} 
+                className="absolute top-4 right-4 p-2 hover:bg-white/5 rounded-full opacity-50 hover:opacity-100 transition-all"
               >
-                {activeMatch?.shelter_rating ? 'Обновить оценку' : 'Оценить'}
+                <X size={20} />
               </button>
 
-              {/* Кнопка удаления оценки */}
-              {activeMatch?.shelter_rating && (
-                <button 
-                  onClick={async () => {
-                    try {
-                      const { error } = await supabase
-                        .from('matches')
-                        .update({ shelter_rating: null })
-                        .eq('id', activeMatch.id);
-                      
-                      if (!error) {
-                        // Обновляем локальный стейт
-                        const updatedMatch = { ...activeMatch, shelter_rating: undefined };
-                        setActiveMatch(updatedMatch);
-                        setMatches(prev => prev.map(m => 
-                          m.id === activeMatch.id ? updatedMatch : m
-                        ));
-                        setRating(0);
-                        setShowRating(false);
-                        setRatingSubmitted(false);
-                      } else {
-                        console.error('Ошибка удаления оценки:', error);
-                        alert('Не удалось удалить оценку');
-                      }
-                    } catch (err) {
-                      console.error('Ошибка:', err);
-                      alert('Произошла ошибка при удалении');
-                    }
-                  }} 
-                  className="w-full py-3 text-red-500/60 hover:text-red-500 text-xs font-medium transition-colors"
-                  type="button"
+              <h3 className="text-xl font-bold mb-6">Оценка приюта</h3>
+
+              {ratingSubmitted ? (
+                <motion.div 
+                  initial={{ scale: 0 }} 
+                  animate={{ scale: 1 }} 
+                  className="py-4"
                 >
-                  Удалить отзыв
-                </button>
+                  <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                  <p className="text-green-500 font-bold mb-4">Оценка сохранена!</p>
+                  <button 
+                    onClick={() => {
+                      setShowRating(false);
+                      setRatingSubmitted(false);
+                    }}
+                    className="px-6 py-2 bg-white/5 rounded-xl text-sm font-medium hover:bg-white/10 transition-colors"
+                  >
+                    Закрыть
+                  </button>
+                </motion.div>
+              ) : (
+                <>
+                  <div className="flex justify-center gap-2 mb-8">
+                    {[1, 2, 3, 4, 5].map(s => (
+                      <button 
+                        key={s} 
+                        onClick={() => setRating(s)} 
+                        className="transition-transform hover:scale-110 active:scale-95"
+                        type="button"
+                      >
+                        <Star 
+                          size={32} 
+                          className={rating >= s ? "fill-yellow-400 text-yellow-400" : "text-white/20 hover:text-white/40"} 
+                        />
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <button 
+                      onClick={submitRating} 
+                      disabled={rating === 0} 
+                      className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-2xl font-bold text-sm disabled:opacity-30 disabled:hover:bg-blue-600 transition-all"
+                    >
+                      {activeMatch?.shelter_rating ? 'Обновить оценку' : 'Оценить'}
+                    </button>
+
+                    {/* Кнопка удаления оценки исправлена здесь */}
+                    {activeMatch?.shelter_rating && (
+                      <button 
+                        onClick={deleteRating} 
+                        className="w-full py-3 text-red-500/60 hover:text-red-500 text-xs font-medium transition-colors"
+                        type="button"
+                      >
+                        Удалить отзыв
+                      </button>
+                    )}
+                  </div>
+                </>
               )}
-            </div>
-          </>
+            </motion.div>
+          </motion.div>
         )}
-      </motion.div>
-    </motion.div>
-  )}
-</AnimatePresence>
+      </AnimatePresence>
     </div>
   );
 }
