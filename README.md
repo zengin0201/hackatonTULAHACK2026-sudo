@@ -4,7 +4,12 @@
 
 # Запуск
 ```
-cp .env.example .env
+npm install
+npm install react react-dom
+
+```
+```
+cp .env
 ```
 внести изменения в .env
 
