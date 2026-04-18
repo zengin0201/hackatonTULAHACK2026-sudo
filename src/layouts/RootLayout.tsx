@@ -69,7 +69,7 @@ export default function RootLayout() {
   }, [user]);
 
   return (
-    <div className="w-full min-h-screen flex p-6 md:p-10 gap-10 bg-[radial-gradient(circle_at_10%_20%,rgba(56,189,248,0.05)_0%,transparent_50%),radial-gradient(circle_at_90%_80%,rgba(139,92,246,0.05)_0%,transparent_50%)] overflow-hidden items-center justify-center max-w-7xl mx-auto">
+    <div className="w-full min-h-screen flex p-3 md:p-10 gap-10 bg-[radial-gradient(circle_at_10%_20%,rgba(56,189,248,0.05)_0%,transparent_50%),radial-gradient(circle_at_90%_80%,rgba(139,92,246,0.05)_0%,transparent_50%)] overflow-hidden items-center justify-center max-w-7xl mx-auto">
       
      
       <aside className="w-[280px] flex-col gap-6 hidden lg:flex h-[580px] justify-between">
