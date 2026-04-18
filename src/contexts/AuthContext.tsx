@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.error('Error fetching profile from Supabase:', error);
       }
       
-      // Ищем юзера: переданный явно, либо из стейта
+      
       const activeUser = fallbackUser || user;
 
       if (!error && data) {
@@ -94,7 +94,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     });
 
-    // 2. Listen to auth changes
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
