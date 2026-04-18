@@ -17,7 +17,7 @@ VITE_SUPABASE_URL = URL ПРОЕКТА SUPABASE
 VITE_SUPABASE_ANON_KEY = КЛЮЧ ПРОЕКТА SUPABASE
 ```
 
-#ФИНАЛ
+# ФИНАЛ
 ```
 npm run dev
 ```
