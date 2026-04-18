@@ -116,26 +116,35 @@ export default function Messages() {
   };
 
   const submitRating = async () => {
-    if (rating === 0 || !activeMatch) return;
-    try {
-      const { error } = await supabase
-        .from('matches')
-        .update({ shelter_rating: rating })
-        .eq('id', activeMatch.id);
-        
-      if (error) throw error;
-
-      updateRatingInState(rating);
-      setRatingSubmitted(true);
+  if (rating === 0 || !activeMatch) return;
+  
+  try {
+    const { error } = await supabase
+      .from('matches')
+      .update({ shelter_rating: rating })
+      .eq('id', activeMatch.id);
       
-      setTimeout(() => {
-        setShowRating(false);
-        setRatingSubmitted(false);
-      }, 1200);
-    } catch (e) {
-      console.error('Rating error:', e);
-    }
-  };
+    if (error) throw error;
+    
+    const updatedMatch = { ...activeMatch, shelter_rating: rating };
+    setActiveMatch(updatedMatch);
+    
+    setMatches(prev => prev.map(m => 
+      m.id === activeMatch.id ? updatedMatch : m
+    ));
+    
+    setRatingSubmitted(true);
+    
+    setTimeout(() => {
+      setShowRating(false);
+      setRatingSubmitted(false);
+    }, 2000);
+    
+  } catch (e) {
+    console.error('Rating error:', e);
+    alert('Не удалось сохранить оценку');
+  }
+};
 
   const deleteRating = async () => {
     if (!activeMatch) return;
@@ -280,74 +289,127 @@ export default function Messages() {
       </div>
 
       {/* Rating Modal */}
-      <AnimatePresence>
-        {showRating && (
+      {/* Modal Rating */}
+<AnimatePresence>
+  {showRating && (
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      exit={{ opacity: 0 }} 
+      className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
+      onClick={() => {
+        setShowRating(false);
+        setRatingSubmitted(false);
+        setRating(activeMatch?.shelter_rating || 0); // Сбрасываем рейтинг к сохраненному значению
+      }}
+    >
+      <motion.div 
+        initial={{ scale: 0.9, y: 20 }} 
+        animate={{ scale: 1, y: 0 }} 
+        className="w-full max-w-[340px] bg-[#1a1a1a] rounded-[32px] border border-white/10 p-8 text-center shadow-2xl relative"
+        onClick={(e) => e.stopPropagation()} // Предотвращаем закрытие при клике внутри
+      >
+        {/* Кнопка закрытия модалки (Крестик) */}
+        <button 
+          onClick={() => {
+            setShowRating(false);
+            setRatingSubmitted(false);
+            setRating(activeMatch?.shelter_rating || 0); // Сбрасываем рейтинг
+          }} 
+          className="absolute top-4 right-4 p-2 hover:bg-white/5 rounded-full opacity-50 hover:opacity-100 transition-all"
+        >
+          <X size={20} />
+        </button>
+
+        <h3 className="text-xl font-bold mb-6">Оценка приюта</h3>
+
+        {ratingSubmitted ? (
           <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={() => setShowRating(false)}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-app-bg/80 backdrop-blur-xl"
+            initial={{ scale: 0 }} 
+            animate={{ scale: 1 }} 
+            className="py-4"
           >
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-              onClick={e => e.stopPropagation()}
-              className="bg-app-card border border-white/10 p-8 rounded-[40px] max-w-sm w-full shadow-2xl relative"
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <p className="text-green-500 font-bold mb-4">Оценка сохранена!</p>
+            <button 
+              onClick={() => {
+                setShowRating(false);
+                setRatingSubmitted(false);
+              }}
+              className="px-6 py-2 bg-white/5 rounded-xl text-sm font-medium hover:bg-white/10 transition-colors"
             >
+              Закрыть
+            </button>
+          </motion.div>
+        ) : (
+          <>
+            <div className="flex justify-center gap-2 mb-8">
+              {[1, 2, 3, 4, 5].map(s => (
+                <button 
+                  key={s} 
+                  onClick={() => setRating(s)} 
+                  className="transition-transform hover:scale-110 active:scale-95"
+                  type="button"
+                >
+                  <Star 
+                    size={32} 
+                    className={rating >= s ? "fill-yellow-400 text-yellow-400" : "text-white/20 hover:text-white/40"} 
+                  />
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-col gap-2">
               <button 
-                onClick={() => setShowRating(false)}
-                className="absolute top-6 right-6 p-2 rounded-full hover:bg-white/5 text-app-dim transition-colors"
+                onClick={submitRating} 
+                disabled={rating === 0} 
+                className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-2xl font-bold text-sm disabled:opacity-30 disabled:hover:bg-blue-600 transition-all"
               >
-                <X size={20} />
+                {activeMatch?.shelter_rating ? 'Обновить оценку' : 'Оценить'}
               </button>
 
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-app-accent/20 text-app-accent rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Star size={32} />
-                </div>
-                <h3 className="text-xl font-bold mb-2 text-white">Оцените приют</h3>
-                <p className="text-app-dim text-sm">Ваш отзыв важен для нас!</p>
-              </div>
-
-              <div className="flex flex-col items-center">
-                {ratingSubmitted ? (
-                  <div className="flex flex-col items-center py-4">
-                    <CheckCircle className="text-app-success mb-2" size={32} />
-                    <p className="font-bold text-app-success">Готово!</p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex gap-2 mb-8">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button key={star} type="button" onClick={() => setRating(star)} className="p-2 transition-transform hover:scale-125">
-                          <Star size={32} className={rating >= star ? "fill-app-accent text-app-accent" : "text-white/20"} />
-                        </button>
-                      ))}
-                    </div>
-                    
-                    <div className="flex flex-col gap-3 w-full">
-                      <button
-                        onClick={submitRating}
-                        disabled={rating === 0}
-                        className="w-full py-4 rounded-2xl bg-app-accent text-app-bg font-bold hover:bg-sky-400 transition-colors disabled:opacity-50"
-                      >
-                        {activeMatch?.shelter_rating ? 'Обновить отзыв' : 'Оценить'}
-                      </button>
-
-                      {activeMatch?.shelter_rating && (
-                        <button
-                          onClick={deleteRating}
-                          className="w-full py-2 text-red-500/60 hover:text-red-500 text-xs font-medium transition-colors"
-                        >
-                          Удалить отзыв
-                        </button>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
+              {/* Кнопка удаления оценки */}
+              {activeMatch?.shelter_rating && (
+                <button 
+                  onClick={async () => {
+                    try {
+                      const { error } = await supabase
+                        .from('matches')
+                        .update({ shelter_rating: null })
+                        .eq('id', activeMatch.id);
+                      
+                      if (!error) {
+                        // Обновляем локальный стейт
+                        const updatedMatch = { ...activeMatch, shelter_rating: undefined };
+                        setActiveMatch(updatedMatch);
+                        setMatches(prev => prev.map(m => 
+                          m.id === activeMatch.id ? updatedMatch : m
+                        ));
+                        setRating(0);
+                        setShowRating(false);
+                        setRatingSubmitted(false);
+                      } else {
+                        console.error('Ошибка удаления оценки:', error);
+                        alert('Не удалось удалить оценку');
+                      }
+                    } catch (err) {
+                      console.error('Ошибка:', err);
+                      alert('Произошла ошибка при удалении');
+                    }
+                  }} 
+                  className="w-full py-3 text-red-500/60 hover:text-red-500 text-xs font-medium transition-colors"
+                  type="button"
+                >
+                  Удалить отзыв
+                </button>
+              )}
+            </div>
+          </>
         )}
-      </AnimatePresence>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
     </div>
   );
 }
