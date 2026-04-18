@@ -480,9 +480,9 @@ export default function Feed() {
 
   return (
     <div className="flex flex-col items-center w-full h-full justify-center relative">
-      <div className="relative w-full max-w-[420px] h-[580px] shrink-0 mb-8">
+      <div className="relative w-full max-w-[420px] flex-1 md:h-[580px] md:flex-none mb-4 md:mb-8">
         {loading ? (
-          <div className="absolute inset-0 bg-app-card rounded-[32px] border border-white/10 flex items-center justify-center shadow-2xl z-10">
+          <div className="absolute inset-0 h-full bg-app-card rounded-[32px] border border-white/10 flex items-center justify-center shadow-2xl z-10">
             <Loader2 className="w-10 h-10 animate-spin text-app-accent" />
           </div>
         ) : pets.length > 0 ? (
@@ -497,7 +497,7 @@ export default function Feed() {
             />
           )).reverse() 
         ) : (
-           <div className="absolute inset-0 bg-app-card rounded-[32px] border border-white/10 flex flex-col items-center justify-center shadow-2xl p-8 text-center text-app-dim z-10">
+           <div className="absolute inset-0 h-full bg-app-card rounded-[32px] border border-white/10 flex flex-col items-center justify-center shadow-2xl p-8 text-center text-app-dim z-10">
              <PawPrint className="w-16 h-16 opacity-50 mb-4" />
              <p className="font-bold text-app-text text-lg mb-1">Никого не осталось</p>
              <p className="text-sm">Вы просмотрели всех питомцев в вашем регионе! Зайдите позже.</p>
@@ -516,7 +516,7 @@ export default function Feed() {
         </AnimatePresence>
       </div>
 
-      <div className="flex gap-4 md:gap-5 flex-wrap justify-center items-center z-10 w-full max-w-[420px] px-4 mb-24">
+      <div className="flex gap-3 md:gap-5 flex-wrap justify-center items-center z-10 w-full max-w-[420px] px-4 pb-4 md:pb-0">
         <button 
           onClick={() => forceSwipe('left')}
           disabled={pets.length === 0 || !!detailedPet}
