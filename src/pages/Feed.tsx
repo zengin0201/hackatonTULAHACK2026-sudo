@@ -73,7 +73,6 @@ const ImageCarousel = ({
         className="w-full h-full object-cover pointer-events-none select-none"
       />
 
-      
       {imageUrls.length > 1 && (
         <>
           <div
@@ -90,11 +89,10 @@ const ImageCarousel = ({
             {imageUrls.map((_, idx) => (
               <div
                 key={idx}
-                className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${
-                  idx === currentIndex
+                className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${idx === currentIndex
                     ? "bg-white shadow-[0_0_4px_rgba(0,0,0,0.5)]"
                     : "bg-white/40"
-                }`}
+                  }`}
               />
             ))}
           </div>
@@ -508,6 +506,7 @@ export default function Feed() {
   const [matchPet, setMatchPet] = useState<Pet | null>(null);
   const [detailedPet, setDetailedPet] = useState<Pet | null>(null);
   const [sponsoringPet, setSponsoringPet] = useState<Pet | null>(null);
+  const [filter, setFilter] = useState<string>("all");
 
   useEffect(() => {
     if (user && profile?.role !== "SHELTER") {
@@ -515,7 +514,7 @@ export default function Feed() {
     } else {
       setLoading(false);
     }
-  }, [user, profile]);
+  }, [user, profile, filter]);
 
   const fetchFeed = async () => {
     if (!user) return;
@@ -538,6 +537,9 @@ export default function Feed() {
 
       if (swipedPetIds.length > 0) {
         query = query.not("id", "in", `(${swipedPetIds.join(",")})`);
+      }
+      if (filter !== "all") {
+        query = query.eq("type", filter);
       }
 
       const { data: petsData, error: petsError } = await query;
@@ -612,78 +614,75 @@ export default function Feed() {
   };
 
   const handleSponsorshipSuccess = async (amount: number) => {
-  if (sponsoringPet && user) {
-    const newAmount = (sponsoringPet.current_donations || 0) + amount;
-    setPets((prev) =>
-      prev.map((p) =>
-        p.id === sponsoringPet.id
-          ? { ...p, current_donations: newAmount }
-          : p,
-      ),
-    );
-    if (detailedPet && detailedPet.id === sponsoringPet.id) {
-      setDetailedPet((prev) =>
-        prev ? { ...prev, current_donations: newAmount } : null,
+    if (sponsoringPet && user) {
+      const newAmount = (sponsoringPet.current_donations || 0) + amount;
+      setPets((prev) =>
+        prev.map((p) =>
+          p.id === sponsoringPet.id
+            ? { ...p, current_donations: newAmount }
+            : p,
+        ),
       );
-    }
+      if (detailedPet && detailedPet.id === sponsoringPet.id) {
+        setDetailedPet((prev) =>
+          prev ? { ...prev, current_donations: newAmount } : null,
+        );
+      }
 
-    try {
-      await supabase
-        .from("pets")
-        .update({ current_donations: newAmount })
-        .eq("id", sponsoringPet.id);
-
-      const { data: existingMatch } = await supabase
-        .from("matches")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("pet_id", sponsoringPet.id)
-        .single();
-
-      if (existingMatch) {
+      try {
         await supabase
+          .from("pets")
+          .update({ current_donations: newAmount })
+          .eq("id", sponsoringPet.id);
+
+        const { data: existingMatch } = await supabase
           .from("matches")
-          .update({ is_sponsor: true })
-          .eq("id", existingMatch.id);
-      } else {
-        
-        const { data: matchData, error: matchError } = await supabase
-          .from("matches")
-          .insert({
-            user_id: user.id,
-            pet_id: sponsoringPet.id,
-            shelter_id: sponsoringPet.shelter_id,
-            is_sponsor: true // <-- Тот самый флаг
-          })
-          .select(`*, shelter:profiles!matches_shelter_id_fkey(name)`)
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("pet_id", sponsoringPet.id)
           .single();
 
-        
-        await supabase.from("swipes").insert({
-          user_id: user.id,
-          pet_id: sponsoringPet.id,
-          action: "LIKE",
-        });
+        if (existingMatch) {
+          await supabase
+            .from("matches")
+            .update({ is_sponsor: true })
+            .eq("id", existingMatch.id);
+        } else {
+          const { data: matchData, error: matchError } = await supabase
+            .from("matches")
+            .insert({
+              user_id: user.id,
+              pet_id: sponsoringPet.id,
+              shelter_id: sponsoringPet.shelter_id,
+              is_sponsor: true, // <-- Тот самый флаг
+            })
+            .select(`*, shelter:profiles!matches_shelter_id_fkey(name)`)
+            .single();
 
-        
-        if (!matchError && matchData) {
-          setMatchPet({
-            ...sponsoringPet,
-            userName: profile?.name || "Вы",
-            shelterName: matchData.shelter?.name || "Приют",
+          await supabase.from("swipes").insert({
+            user_id: user.id,
+            pet_id: sponsoringPet.id,
+            action: "LIKE",
           });
-          
-          setPets((prev) => prev.filter(p => p.id !== sponsoringPet.id));
-          setDetailedPet(null); 
-        }
-      }
-    } catch (e) {
-      console.error("Ошибка сохранения пожертвования или создания мэтча:", e);
-    }
 
-    setSponsoringPet(null);
-  }
-};
+          if (!matchError && matchData) {
+            setMatchPet({
+              ...sponsoringPet,
+              userName: profile?.name || "Вы",
+              shelterName: matchData.shelter?.name || "Приют",
+            });
+
+            setPets((prev) => prev.filter((p) => p.id !== sponsoringPet.id));
+            setDetailedPet(null);
+          }
+        }
+      } catch (e) {
+        console.error("Ошибка сохранения пожертвования или создания мэтча:", e);
+      }
+
+      setSponsoringPet(null);
+    }
+  };
 
   const effectiveRole = profile?.role || user?.user_metadata?.role;
 
@@ -702,6 +701,43 @@ export default function Feed() {
 
   return (
     <div className="flex flex-col items-center w-full h-full justify-center relative">
+      {/* Контейнер фильтров */}
+      <div className="sticky top-0 z-30 bg-app-bg/95 backdrop-blur-sm border-b border-white/5 mb-4">
+        <div className="flex gap-2 px-4 py-4 overflow-x-auto no-scrollbar">
+          {[
+            { id: 'all', label: 'Все лапки', icon: '🐾' },
+            { id: 'dog', label: 'Собаки', icon: '🐶' },
+            { id: 'cat', label: 'Кошки', icon: '🐱' },
+            {id:"parrot",label:"Попугаи",icon : "🦜"},
+            {id:"rodent",label:"Грызуны",icon : "🐁"},
+            {id:"turtle",label:"Рептилии",icon : "🐢"},
+            { id: 'other', label: 'Другие', icon: '🐹' }
+          ].map((cat) => {
+            const isActive = filter === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setFilter(cat.id)}
+                className={`
+            flex items-center gap-2 px-5 py-2.5 rounded-2xl whitespace-nowrap 
+            transition-all duration-300 border
+            ${isActive
+                    ? 'bg-app-accent border-app-accent text-app-bg font-bold shadow-[0_0_20px_rgba(125,211,252,0.3)] scale-105'
+                    : 'bg-white/5 border-white/10 text-app-dim hover:bg-white/10 hover:border-white/20'
+                  }
+          `}
+              >
+                <span className={`text-lg ${isActive ? 'scale-110' : 'opacity-70'}`}>
+                  {cat.icon}
+                </span>
+                <span className="text-sm tracking-wide">
+                  {cat.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
       <div className="relative w-full max-w-[420px] flex-1 md:h-[580px] md:flex-none mb-4 md:mb-8">
         {loading ? (
           <div className="absolute inset-0 h-full bg-app-card rounded-[32px] border border-white/10 flex items-center justify-center shadow-2xl z-10">
