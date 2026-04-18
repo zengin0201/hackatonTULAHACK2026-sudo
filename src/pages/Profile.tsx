@@ -183,10 +183,10 @@ export default function Profile() {
                   ? "Аккаунт Приюта"
                   : "Аккаунт Усыновителя"}
               </div>
-              <h1 className="text-2xl md:text-3xl font-extrabold text-white mb-1 truncate">
+              <h1 className="text-2xl md:text-3xl font-extrabold text-white mb-1 truncate break-words">
                 {user?.email?.split("@")[0] || "Пользователь"}
               </h1>
-              <p className="text-sm text-slate-400 truncate">
+              <p className="text-sm text-slate-400 truncate break-all">
                 {user?.email || "Email скрыт"}
               </p>
             </div>
