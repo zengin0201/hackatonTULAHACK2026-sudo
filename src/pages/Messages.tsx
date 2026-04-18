@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../utils/supabaseClient';
-import { Loader2, Send, PawPrint, MessageCircle, ArrowLeft, Star, X, CheckCircle } from 'lucide-react';
+import { Loader2, Send, MessageCircle, ArrowLeft, Star, X, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function Messages() {
@@ -93,6 +93,28 @@ export default function Messages() {
     }
   };
 
+  // ТА САМАЯ ФУНКЦИЯ, КОТОРОЙ НЕ ХВАТАЛО
+  const sendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputText.trim() || !activeMatch || !user) return;
+
+    const newMessage = {
+      match_id: activeMatch.id,
+      sender_id: user.id,
+      text: inputText.trim(),
+    };
+
+    setInputText(''); // Сразу очищаем для UX
+
+    try {
+      const { error } = await supabase.from('messages').insert(newMessage);
+      if (error) throw error;
+    } catch (e) {
+      console.error('Ошибка отправки:', e);
+      alert('Не удалось отправить сообщение');
+    }
+  };
+
   const submitRating = async () => {
     if (rating === 0 || !activeMatch) return;
     try {
@@ -138,12 +160,10 @@ export default function Messages() {
     }
   };
 
-  const effectiveRole = profile?.role || user?.user_metadata?.role;
-
   return (
     <div className="w-full h-full flex bg-app-card rounded-[32px] border border-white/10 shadow-2xl overflow-hidden max-w-5xl mx-auto">
       
-      {/* Sidebar - Matches List */}
+      {/* Sidebar */}
       <div className={`w-full md:w-[320px] shrink-0 border-r border-white/5 flex flex-col ${activeMatch ? 'hidden md:flex' : 'flex'}`}>
         <div className="p-6 border-b border-white/5">
           <h2 className="text-xl font-bold flex items-center gap-2">
@@ -182,7 +202,6 @@ export default function Messages() {
            </div>
         ) : (
           <>
-            {/* Chat Header */}
             <div className="p-4 border-b border-white/5 bg-app-card/80 backdrop-blur-md flex items-center justify-between sticky top-0 z-10">
               <div className="flex items-center gap-3">
                 <button onClick={() => setActiveMatch(null)} className="md:hidden p-2 hover:bg-white/10 rounded-full"><ArrowLeft size={20} /></button>
@@ -201,7 +220,6 @@ export default function Messages() {
               </button>
             </div>
 
-            {/* Messages List */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {messages.map((msg) => (
                 <div key={msg.id} className={`flex ${msg.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}>
@@ -213,7 +231,6 @@ export default function Messages() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Area */}
             <form onSubmit={sendMessage} className="p-4 border-t border-white/5 bg-app-card/80">
               <div className="flex gap-2">
                 <input 
@@ -235,15 +252,14 @@ export default function Messages() {
         {showRating && (
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={() => setShowRating(false)} // Закрытие по клику на фон
+            onClick={() => setShowRating(false)}
             className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-app-bg/80 backdrop-blur-xl"
           >
             <motion.div 
               initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-              onClick={e => e.stopPropagation()} // Чтобы клик внутри не закрывал окно
+              onClick={e => e.stopPropagation()}
               className="bg-app-card border border-white/10 p-8 rounded-[40px] max-w-sm w-full shadow-2xl relative"
             >
-              {/* Кнопка закрытия X */}
               <button 
                 onClick={() => setShowRating(false)}
                 className="absolute top-6 right-6 p-2 rounded-full hover:bg-white/5 text-app-dim transition-colors"
@@ -269,7 +285,7 @@ export default function Messages() {
                   <>
                     <div className="flex gap-2 mb-8">
                       {[1, 2, 3, 4, 5].map((star) => (
-                        <button key={star} onClick={() => setRating(star)} className="p-2 transition-transform hover:scale-120">
+                        <button key={star} type="button" onClick={() => setRating(star)} className="p-2 transition-transform hover:scale-120">
                           <Star size={32} className={rating >= star ? "fill-app-accent text-app-accent" : "text-white/20"} />
                         </button>
                       ))}
@@ -281,10 +297,10 @@ export default function Messages() {
                         disabled={rating === 0}
                         className="w-full py-4 rounded-2xl bg-app-accent text-app-bg font-bold hover:bg-sky-400 transition-colors disabled:opacity-50"
                       >
-                        {activeMatch.shelter_rating ? 'Обновить отзыв' : 'Оценить'}
+                        {activeMatch?.shelter_rating ? 'Обновить отзыв' : 'Оценить'}
                       </button>
 
-                      {activeMatch.shelter_rating && (
+                      {activeMatch?.shelter_rating && (
                         <button
                           onClick={deleteRating}
                           className="w-full py-2 text-red-500/60 hover:text-red-500 text-xs font-medium transition-colors"
