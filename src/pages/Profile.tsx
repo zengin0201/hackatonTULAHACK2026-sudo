@@ -101,7 +101,48 @@ export default function Profile() {
       console.error("Ошибка при выходе:", error);
     }
   };
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!user?.id || !profile?.role) return;
 
+      try {
+        if (profile.role === 'SHELTER') {
+          const { count: likesCount } = await supabase
+            .from('matches')
+            .select('*', { count: 'exact', head: true })
+            .eq('shelter_id', user.id);
+
+          // Считаем количество активных питомцев приюта
+          const { count: petsCount } = await supabase
+            .from('pets')
+            .select('*', { count: 'exact', head: true })
+            .eq('shelter_id', user.id);
+
+          setStats(prev => ({
+            ...prev,
+            likes: likesCount || 0,
+            pets: petsCount || 0,
+          }));
+        } else {
+          
+          const { count: likesCount } = await supabase
+            .from('matches')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id);
+
+          setStats(prev => ({
+            ...prev,
+            likes: likesCount || 0,
+            matches: likesCount || 0, 
+          }));
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке статистики:', error);
+      }
+    };
+
+    fetchStats();
+  }, [user, profile]);
   
   const effectiveRole = profile?.role || user?.user_metadata?.role;
 
