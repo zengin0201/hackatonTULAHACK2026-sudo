@@ -17,9 +17,11 @@ interface Pet {
   attributes?: {
     requires_space: boolean;
     cat_friendly: boolean;
-    status?:string;
+    status?: string;
   };
   matchPercentage?: number;
+  userName?: string;
+  shelterName?: string;
 }
 
 const calculateMatch = (pet: Pet, userAnswers: any) => {
@@ -46,7 +48,6 @@ const SponsorshipModal = ({ pet, onClose, onSuccess }: { pet: Pet, onClose: () =
 
   const handleDonate = () => {
     setProcessing(true);
-    // Simulate payment
     setTimeout(() => {
       setProcessing(false);
       setSuccess(true);
@@ -379,7 +380,6 @@ export default function Feed() {
       if (petsError) throw petsError;
       
       if (petsData) {
-        
         const filteredPets = petsData.filter((p: Pet) => p.attributes?.status !== 'adopted');
         const petsWithMatch = filteredPets.map((p: Pet) => ({
           ...p,
@@ -410,16 +410,27 @@ export default function Feed() {
       if (error) console.error(`Ошибка при сохранении свайпа (${action}):`, error);
       
       if (action === 'LIKE') {
-        const { error: matchError } = await supabase.from('matches').insert({
-          user_id: user.id,
-          pet_id: petId,
-          shelter_id: swipedPet.shelter_id
-        });
+        const { data: matchData, error: matchError } = await supabase
+          .from('matches')
+          .insert({
+            user_id: user.id,
+            pet_id: petId,
+            shelter_id: swipedPet.shelter_id
+          })
+          .select(`
+            *,
+            shelter:profiles!matches_shelter_id_fkey(name)
+          `)
+          .single();
         
         if (matchError) {
           console.error('Ошибка создания мэтча:', matchError);
         } else {
-          setMatchPet(swipedPet);
+          setMatchPet({
+            ...swipedPet,
+            userName: profile?.name || 'Вы',
+            shelterName: matchData.shelter?.name || 'Приют'
+          });
         }
       }
     }
@@ -435,7 +446,6 @@ export default function Feed() {
     if (sponsoringPet) {
       const newAmount = (sponsoringPet.current_donations || 0) + amount;
       
-      // Update local state temporarily
       setPets(prev => prev.map(p => 
         p.id === sponsoringPet.id ? { ...p, current_donations: newAmount } : p
       ));
@@ -555,18 +565,38 @@ export default function Feed() {
               className="flex flex-col items-center text-center w-full"
             >
               <div className="text-4xl md:text-5xl font-extrabold text-app-success tracking-tighter mb-2" style={{ textShadow: '0 0 20px rgba(74,222,128,0.5)'}}>
-                It's a Match!
+                It's a Match! 🎉
               </div>
-              <p className="text-app-text mb-8">Вы и {matchPet.name} понравились друг другу.</p>
+              <p className="text-app-text mb-8">
+                <span className="font-bold text-app-accent">{profile?.name || 'Вы'}</span> и{' '}
+                <span className="font-bold text-app-accent">{matchPet.shelterName || 'Приют'}</span> понравились друг другу!
+              </p>
               
               <div className="flex gap-4 items-center justify-center mb-10 w-full relative">
-                <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-app-success shadow-[0_0_30px_rgba(74,222,128,0.4)] bg-app-accent text-app-bg flex items-center justify-center font-bold text-3xl z-10 shrink-0">
-                  {profile?.name?.charAt(0) || 'U'}
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-app-success shadow-[0_0_30px_rgba(74,222,128,0.4)] bg-gradient-to-br from-app-accent to-sky-600 text-app-bg flex items-center justify-center font-bold text-3xl z-10">
+                    {profile?.name?.charAt(0)?.toUpperCase() || 'U'}
+                  </div>
+                  <span className="text-xs font-medium text-app-text">
+                    {profile?.name || 'Вы'}
+                  </span>
                 </div>
-                <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-app-success shadow-[0_0_30px_rgba(74,222,128,0.4)] bg-app-card overflow-hidden z-10 shrink-0 -ml-6 md:-ml-8">
-                  {matchPet.image_urls?.[0] ? (
-                    <img src={matchPet.image_urls[0]} alt={matchPet.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                  ) : <PawPrint className="w-full h-full p-4 text-app-dim opacity-50" />}
+                
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+                  <div className="w-10 h-10 bg-app-success rounded-full flex items-center justify-center shadow-lg">
+                    <Heart size={20} className="text-white fill-white" />
+                  </div>
+                </div>
+                
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-app-success shadow-[0_0_30px_rgba(74,222,128,0.4)] bg-app-card overflow-hidden z-10">
+                    {matchPet.image_urls?.[0] ? (
+                      <img src={matchPet.image_urls[0]} alt={matchPet.name} className="w-full h-full object-cover" />
+                    ) : <PawPrint className="w-full h-full p-4 text-app-dim opacity-50" />}
+                  </div>
+                  <span className="text-xs font-medium text-app-text">
+                    {matchPet.name}
+                  </span>
                 </div>
               </div>
 
@@ -578,7 +608,7 @@ export default function Feed() {
                   }}
                   className="w-full h-14 bg-app-success hover:bg-green-400 text-app-bg font-bold rounded-2xl flex items-center justify-center gap-2 transition-colors"
                 >
-                  <MessageCircle className="w-5 h-5" /> Узнать подробности
+                  <MessageCircle className="w-5 h-5" /> Написать сообщение
                 </button>
                 <button 
                   onClick={() => setMatchPet(null)}
