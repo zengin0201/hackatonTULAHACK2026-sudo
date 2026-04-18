@@ -612,34 +612,78 @@ export default function Feed() {
   };
 
   const handleSponsorshipSuccess = async (amount: number) => {
-    if (sponsoringPet) {
-      const newAmount = (sponsoringPet.current_donations || 0) + amount;
-
-      setPets((prev) =>
-        prev.map((p) =>
-          p.id === sponsoringPet.id
-            ? { ...p, current_donations: newAmount }
-            : p,
-        ),
+  if (sponsoringPet && user) {
+    const newAmount = (sponsoringPet.current_donations || 0) + amount;
+    setPets((prev) =>
+      prev.map((p) =>
+        p.id === sponsoringPet.id
+          ? { ...p, current_donations: newAmount }
+          : p,
+      ),
+    );
+    if (detailedPet && detailedPet.id === sponsoringPet.id) {
+      setDetailedPet((prev) =>
+        prev ? { ...prev, current_donations: newAmount } : null,
       );
-      if (detailedPet && detailedPet.id === sponsoringPet.id) {
-        setDetailedPet((prev) =>
-          prev ? { ...prev, current_donations: newAmount } : null,
-        );
-      }
-
-      try {
-        await supabase
-          .from("pets")
-          .update({ current_donations: newAmount })
-          .eq("id", sponsoringPet.id);
-      } catch (e) {
-        console.error("Ошибка сохранения пожертвования:", e);
-      }
-
-      setSponsoringPet(null);
     }
-  };
+
+    try {
+      await supabase
+        .from("pets")
+        .update({ current_donations: newAmount })
+        .eq("id", sponsoringPet.id);
+
+      const { data: existingMatch } = await supabase
+        .from("matches")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("pet_id", sponsoringPet.id)
+        .single();
+
+      if (existingMatch) {
+        await supabase
+          .from("matches")
+          .update({ is_sponsor: true })
+          .eq("id", existingMatch.id);
+      } else {
+        
+        const { data: matchData, error: matchError } = await supabase
+          .from("matches")
+          .insert({
+            user_id: user.id,
+            pet_id: sponsoringPet.id,
+            shelter_id: sponsoringPet.shelter_id,
+            is_sponsor: true // <-- Тот самый флаг
+          })
+          .select(`*, shelter:profiles!matches_shelter_id_fkey(name)`)
+          .single();
+
+        
+        await supabase.from("swipes").insert({
+          user_id: user.id,
+          pet_id: sponsoringPet.id,
+          action: "LIKE",
+        });
+
+        
+        if (!matchError && matchData) {
+          setMatchPet({
+            ...sponsoringPet,
+            userName: profile?.name || "Вы",
+            shelterName: matchData.shelter?.name || "Приют",
+          });
+          
+          setPets((prev) => prev.filter(p => p.id !== sponsoringPet.id));
+          setDetailedPet(null); 
+        }
+      }
+    } catch (e) {
+      console.error("Ошибка сохранения пожертвования или создания мэтча:", e);
+    }
+
+    setSponsoringPet(null);
+  }
+};
 
   const effectiveRole = profile?.role || user?.user_metadata?.role;
 
