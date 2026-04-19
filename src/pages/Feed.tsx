@@ -480,8 +480,8 @@ const TinderCard = ({
         </div>
 
         <div className="absolute bottom-0 left-0 w-full p-6 block md:hidden z-10 pointer-events-none bg-gradient-to-t from-[#0F172A] to-transparent pt-12">
-          <div className="flex justify-between items-end">
-            <div className="flex-1 pr-2">
+          <div className="flex justify-between items-end gap-2">
+            <div className="flex-1 min-w-0">
               <h2 className="text-3xl font-extrabold mb-1 line-clamp-1 text-white">
                 {pet.name}, {pet.age}
               </h2>
