@@ -68,6 +68,7 @@ export default function Dashboard() {
       }
     }
   };
+
   const handleUrlChange = (index: number, value: string) => {
     const newUrls = [...imageUrls];
     newUrls[index] = value;
@@ -112,6 +113,7 @@ export default function Dashboard() {
         type: "dog",
       });
 
+      setImageUrls([""]);
       await fetchPets();
     } catch (err) {
       console.error(err);
@@ -137,9 +139,11 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="w-full h-full flex gap-6 overflow-hidden max-w-full">
+    // Изменено: grid вместо flex для жесткой фиксации ширины
+    <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 gap-6 overflow-hidden">
+      
       {/* Form Section */}
-      <div className="w-full md:w-1/2 flex flex-col bg-app-card rounded-[32px] border border-white/10 shadow-2xl overflow-hidden h-full">
+      <div className="flex flex-col bg-app-card rounded-[32px] border border-white/10 shadow-2xl overflow-hidden h-full min-w-0">
         <div className="p-6 border-b border-white/10 bg-white/5">
           <h2 className="text-xl font-bold flex items-center gap-2">
             <Plus className="w-5 h-5 text-app-accent" />
@@ -181,6 +185,7 @@ export default function Dashboard() {
                 ))}
               </div>
             </div>
+            
             <div>
               <label className="text-xs uppercase tracking-widest text-app-dim mb-1 block">
                 Имя
@@ -197,8 +202,8 @@ export default function Dashboard() {
               />
             </div>
 
-            <div className="flex gap-4">
-              <div className="flex-1">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
                 <label className="text-xs uppercase tracking-widest text-app-dim mb-1 block">
                   Возраст (лет)
                 </label>
@@ -214,7 +219,7 @@ export default function Dashboard() {
                   placeholder="2"
                 />
               </div>
-              <div className="flex-1">
+              <div>
                 <label className="text-xs uppercase tracking-widest text-app-dim mb-1 block">
                   Цель сбора (₽)
                 </label>
@@ -235,10 +240,6 @@ export default function Dashboard() {
                 URL фотографии
               </label>
               <div className="flex flex-col gap-3">
-                <label className="text-xs uppercase tracking-widest text-app-dim block">
-                  Ссылки на фотографии
-                </label>
-
                 {imageUrls.map((url, index) => (
                   <div key={index} className="flex gap-2">
                     <input
@@ -247,20 +248,19 @@ export default function Dashboard() {
                       value={url}
                       onChange={(e) => handleUrlChange(index, e.target.value)}
                       placeholder="https://example.com/photo.jpg"
-                      className="flex-1 bg-app-glass border border-white/10 rounded-xl px-4 py-3 text-app-text focus:outline-none focus:border-app-accent transition-all"
+                      className="flex-1 min-w-0 bg-app-glass border border-white/10 rounded-xl px-4 py-3 text-app-text focus:outline-none focus:border-app-accent transition-all"
                     />
                     {imageUrls.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeUrlField(index)}
-                        className="px-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20 transition-colors"
+                        className="px-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20 transition-colors shrink-0"
                       >
                         ✕
                       </button>
                     )}
                   </div>
                 ))}
-
                 <button
                   type="button"
                   onClick={addUrlField}
@@ -298,10 +298,10 @@ export default function Dashboard() {
                       requiresSpace: e.target.checked,
                     })
                   }
-                  className="w-4 h-4 accent-app-accent"
+                  className="w-4 h-4 accent-app-accent shrink-0"
                 />
                 <span className="text-sm font-medium">
-                  Нужен большой дом/участок (не для квартир)
+                  Нужен большой дом/участок
                 </span>
               </label>
               <label className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-colors">
@@ -311,10 +311,10 @@ export default function Dashboard() {
                   onChange={(e) =>
                     setFormData({ ...formData, catFriendly: e.target.checked })
                   }
-                  className="w-4 h-4 accent-app-accent"
+                  className="w-4 h-4 accent-app-accent shrink-0"
                 />
                 <span className="text-sm font-medium">
-                  Дружит с другими животными / котами
+                  Дружит с другими животными
                 </span>
               </label>
             </div>
@@ -336,7 +336,8 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="hidden md:flex w-1/2 flex-col bg-app-card/50 rounded-[32px] border border-white/5 overflow-hidden h-full">
+      {/* List Section */}
+      <div className="hidden md:flex flex-col bg-app-card/50 rounded-[32px] border border-white/5 overflow-hidden h-full min-w-0">
         <div className="p-6 border-b border-white/5">
           <h2 className="text-xl font-bold">Ваши питомцы ({pets.length})</h2>
         </div>
@@ -353,7 +354,7 @@ export default function Dashboard() {
             pets.map((pet) => (
               <div
                 key={pet.id}
-                className="relative group flex gap-4 p-4 bg-app-glass border border-white/10 rounded-2xl items-center hover:border-white/20 transition-colors"
+                className="relative group flex gap-4 p-4 bg-app-glass border border-white/10 rounded-2xl items-center hover:border-white/20 transition-colors w-full overflow-hidden min-w-0"
               >
                 <div className="w-16 h-16 rounded-xl bg-app-bg border border-white/10 overflow-hidden shrink-0 relative">
                   {pet.attributes?.status === "adopted" && (
@@ -367,7 +368,7 @@ export default function Dashboard() {
                     <img
                       src={pet.image_urls[0]}
                       alt={pet.name}
-                      className={`w-full h-full object-cover ${pet.attributes?.status === "adopted" ? "grayscale opacity-50" : ""}`}
+                      className={` overflow-hidden w-full h-full object-cover ${pet.attributes?.status === "adopted" ? "grayscale opacity-50" : ""}`}
                       referrerPolicy="no-referrer"
                     />
                   ) : (
@@ -376,14 +377,17 @@ export default function Dashboard() {
                     </div>
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-app-text truncate">
+                
+                {/* Исправленный текстовый контейнер */}
+                <div className="flex-1 min-w-0 w-full flex flex-col overflow-hidden">
+                  <h3 className="font-bold text-app-text truncate block w-full">
                     {pet.name}, {pet.age} лет
                   </h3>
-                  <p className="text-xs text-app-dim truncate">
+                  <p className="text-xs text-app-dim truncate block w-full">
                     {pet.description}
                   </p>
                 </div>
+
                 <div className="flex flex-col gap-1 items-end shrink-0">
                   {pet.donation_goal > 0 && (
                     <div className="text-right bg-app-success/10 border border-app-success/20 px-2 py-0.5 rounded-lg whitespace-nowrap mb-1">
@@ -397,14 +401,14 @@ export default function Dashboard() {
                     {pet.attributes?.status !== "adopted" && (
                       <button
                         onClick={() => handleMarkAdopted(pet)}
-                        className="px-2 py-1 bg-app-success/20 text-app-success text-xs font-bold rounded-lg border border-app-success/30 hover:bg-app-success/30 transition-colors"
+                        className="px-2 py-1 bg-app-success/20 text-app-success text-xs font-bold rounded-lg border border-app-success/30 hover:bg-app-success/30 transition-colors shrink-0"
                       >
                         Пристроен!
                       </button>
                     )}
                     <button
                       onClick={() => handleDeletePet(pet.id)}
-                      className="px-2 py-1 bg-app-danger/20 text-app-danger text-xs font-bold rounded-lg border border-app-danger/30 hover:bg-app-danger/30 transition-colors"
+                      className="px-2 py-1 bg-app-danger/20 text-app-danger text-xs font-bold rounded-lg border border-app-danger/30 hover:bg-app-danger/30 transition-colors shrink-0"
                     >
                       Удалить
                     </button>
