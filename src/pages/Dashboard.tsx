@@ -283,7 +283,7 @@ export default function Dashboard() {
                   setFormData({ ...formData, description: e.target.value })
                 }
                 className="w-full bg-app-glass border border-white/10 rounded-xl px-4 py-3 text-app-text focus:outline-none focus:border-app-accent transition-all resize-none"
-                placeholder="Расскажите о характере питомца..."
+                placeholder="Расскажите о питомце,укажите ваше местоположение..."
               />
             </div>
 
