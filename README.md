@@ -67,8 +67,8 @@ npm i --save-dev @types/react
 ```
 Create .env
 Change .env how example:
-VITE_SUPABASE_URL = URL ПРОЕКТА SUPABASE
-VITE_SUPABASE_ANON_KEY = КЛЮЧ ПРОЕКТА SUPABASE
+VITE_SUPABASE_URL = URL of PROJECT SUPABASE
+VITE_SUPABASE_ANON_KEY = KEY OF SUPABASE
 ```
 
 ## FINAL
