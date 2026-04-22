@@ -1,6 +1,4 @@
-## Run Locally
 
-**Prerequisites:**  Node.js
 
 # 🐾 PawMatch - Tinder-like Pet Adoption Platform
 
