@@ -18,7 +18,7 @@ This project was built during a 48-hour hackathon by a dedicated team of four. W
 
 | Role | Developer | Core Responsibilities & Stack |
 | :--- | :--- | :--- |
-| **Team Lead & Frontend Engineer** | Alex ([GitHub](https://github.com/zengin0201)) | React, TypeScript, Vite, Framer Motion, UI/UX Implementation, Project Management, Architecture Design, and Final Pitch |
+| **Team Lead & Frontend Engineer** | Alexey  ([GitHub](https://github.com/zengin0201)) | React, TypeScript, Vite, Framer Motion, UI/UX Implementation, Project Management, Architecture Design, and Final Pitch |
 | **Backend Engineer** | [Tima / https://github.com/timati565] | Python, Core API Development, Business Logic |
 | **Backend Engineer** | [Daniil / https://github.com/sherlockteen] | Database Design (Supabase), Authentication, Infrastructure |
 
