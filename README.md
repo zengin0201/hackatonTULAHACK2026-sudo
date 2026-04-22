@@ -11,6 +11,20 @@
 ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 ![Framer Motion](https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white)
 
+
+## 👥 The Team
+
+This project was built during a 48-hour hackathon by a dedicated team of four. We split the architecture into a strict client-server model to maximize development speed.
+
+| Role | Developer | Core Responsibilities & Stack |
+| :--- | :--- | :--- |
+| **Team Lead** | [Name / GitHub Link] | Project Management, Architecture Design, and Final Pitch |
+| **Frontend Engineer** | Alex ([GitHub](https://github.com/zengin0201)) | React, TypeScript, Vite, Framer Motion, UI/UX Implementation |
+| **Backend Engineer** | [Tima / https://github.com/timati565] | Python, Core API Development, Business Logic |
+| **Backend Engineer** | [Daniil / https://github.com/sherlockteen] | Database Design (Supabase), Authentication, Infrastructure |
+
+> **Note:** As the sole Frontend Engineer, I was fully responsible for translating the design into the interactive, gesture-based UI you see in the final product.
+
 ## 🌟 Key Features
 
 - **Interactive Tinder-style Swipe:** Smooth, gesture-based swiping cards for pet discovery powered by `framer-motion`.
@@ -27,6 +41,7 @@
 - **Animations:** Complex physics-based card gestures and modal transitions using `motion/react`.
 - **Type Safety:** 100% TypeScript coverage for predictable and maintainable code.
 - **Backend-as-a-Service:** Leveraging Supabase for real-time database queries and secure authentication.
+- 
 
 ## 📂 Project Structure
 
