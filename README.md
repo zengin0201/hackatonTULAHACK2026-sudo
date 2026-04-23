@@ -12,9 +12,7 @@
 ![Framer Motion](https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white)
 
 ## DEPLOY
-```
-https://hackaton-tulahack-2026-sudo.vercel.app/
-```
+(https://hackaton-tulahack-2026-sudo.vercel.app/)
 
 ## 👥 The Team
 
